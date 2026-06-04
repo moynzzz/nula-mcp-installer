@@ -88,7 +88,7 @@ function Test-CopilotInstalled {
 }
 
 ###############################################################################
-# JSON merge — preserve existing config, full-replace the cloudbooks server
+# JSON merge — preserve existing config, full-replace the nula server
 # block. Refuses to overwrite invalid JSON. Atomic write via .tmp + Move-Item.
 ###############################################################################
 
@@ -154,7 +154,7 @@ function Get-HeadersBlock {
         $h['Mcp-Team-Id'] = $McpTeamId
     }
     if ($IncludeAuth) {
-        $h['Authorization'] = 'Bearer ${CLOUDBOOKS_MCP_TOKEN}'
+        $h['Authorization'] = 'Bearer ${NULA_MCP_TOKEN}'
     }
     return $h
 }
@@ -197,7 +197,7 @@ function Install-Claude {
     $path = Get-ClaudeConfigPath
     Write-Info "Claude Desktop -> $path"
     Backup-IfPresent $path
-    Merge-McpConfig -Target $path -TopKey 'mcpServers' -ServerName 'cloudbooks' -Block (Build-Block-Claude)
+    Merge-McpConfig -Target $path -TopKey 'mcpServers' -ServerName 'nula' -Block (Build-Block-Claude)
     Write-Ok '  installed'
     $script:NextSteps += 'Claude Desktop: quit + relaunch the app. First connect opens a browser for OAuth consent.'
 }
@@ -206,7 +206,7 @@ function Install-Cursor {
     $path = Get-CursorConfigPath
     Write-Info "Cursor -> $path"
     Backup-IfPresent $path
-    Merge-McpConfig -Target $path -TopKey 'mcpServers' -ServerName 'cloudbooks' -Block (Build-Block-Cursor)
+    Merge-McpConfig -Target $path -TopKey 'mcpServers' -ServerName 'nula' -Block (Build-Block-Cursor)
     Write-Ok '  installed'
     $script:NextSteps += 'Cursor: Settings -> MCP -> Reconnect (or restart Cursor). First connect opens a browser for OAuth consent.'
 }
@@ -215,18 +215,18 @@ function Install-Opencode {
     $path = Get-OpencodeConfigPath
     Write-Info "opencode -> $path"
     Backup-IfPresent $path
-    Merge-McpConfig -Target $path -TopKey 'mcp' -ServerName 'cloudbooks' -Block (Build-Block-Opencode)
+    Merge-McpConfig -Target $path -TopKey 'mcp' -ServerName 'nula' -Block (Build-Block-Opencode)
     Write-Ok '  installed'
-    $script:NextSteps += "opencode: run 'opencode mcp auth cloudbooks' to trigger the browser OAuth flow."
+    $script:NextSteps += "opencode: run 'opencode mcp auth nula' to trigger the browser OAuth flow."
 }
 
 function Install-Copilot {
     $path = Get-CopilotConfigPath
     Write-Info "GitHub Copilot CLI -> $path"
     Backup-IfPresent $path
-    Merge-McpConfig -Target $path -TopKey 'mcpServers' -ServerName 'cloudbooks' -Block (Build-Block-Copilot)
+    Merge-McpConfig -Target $path -TopKey 'mcpServers' -ServerName 'nula' -Block (Build-Block-Copilot)
     Write-Ok '  installed'
-    $script:NextSteps += "Copilot CLI: mint a bearer token (run scripts/qa-mcp-flow.sh from the Nula server repo) and set `$env:CLOUDBOOKS_MCP_TOKEN before starting 'copilot'. Tokens expire after 90 days. Copilot CLI does NOT do OAuth."
+    $script:NextSteps += "Copilot CLI: mint a bearer token (run scripts/qa-mcp-flow.sh from the Nula server repo) and set `$env:NULA_MCP_TOKEN before starting 'copilot'. Tokens expire after 90 days. Copilot CLI does NOT do OAuth."
 }
 
 ###############################################################################

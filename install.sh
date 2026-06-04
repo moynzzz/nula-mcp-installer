@@ -223,7 +223,7 @@ headers = {}
 if team_id:
     headers["Mcp-Team-Id"] = team_id
 if include_auth:
-    headers["Authorization"] = "Bearer ${CLOUDBOOKS_MCP_TOKEN}"
+    headers["Authorization"] = "Bearer ${NULA_MCP_TOKEN}"
 sys.stdout.write(json.dumps(headers))
 PY
 }
@@ -282,7 +282,7 @@ install_claude() {
     local path; path="$(claude_config_path)"
     info "Claude Desktop → $path"
     backup_if_present "$path"
-    merge_json "$path" "mcpServers" "cloudbooks" "$(build_block_claude_or_cursor)"
+    merge_json "$path" "mcpServers" "nula" "$(build_block_claude_or_cursor)"
     ok "  installed"
     NEXT_STEPS+=("Claude Desktop: quit + relaunch the app. First connect opens a browser for OAuth consent (pick teams + Read/Read+Write, approve).")
 }
@@ -291,7 +291,7 @@ install_cursor() {
     local path; path="$(cursor_config_path)"
     info "Cursor → $path"
     backup_if_present "$path"
-    merge_json "$path" "mcpServers" "cloudbooks" "$(build_block_cursor)"
+    merge_json "$path" "mcpServers" "nula" "$(build_block_cursor)"
     ok "  installed"
     NEXT_STEPS+=("Cursor: Settings → MCP → Reconnect (or restart Cursor). First connect opens a browser for OAuth consent.")
 }
@@ -300,18 +300,18 @@ install_opencode() {
     local path; path="$(opencode_config_path)"
     info "opencode → $path"
     backup_if_present "$path"
-    merge_json "$path" "mcp" "cloudbooks" "$(build_block_opencode)"
+    merge_json "$path" "mcp" "nula" "$(build_block_opencode)"
     ok "  installed"
-    NEXT_STEPS+=("opencode: run 'opencode mcp auth cloudbooks' to trigger the browser OAuth flow. Then 'opencode mcp debug cloudbooks' to verify.")
+    NEXT_STEPS+=("opencode: run 'opencode mcp auth nula' to trigger the browser OAuth flow. Then 'opencode mcp debug nula' to verify.")
 }
 
 install_copilot() {
     local path; path="$(copilot_config_path)"
     info "GitHub Copilot CLI → $path"
     backup_if_present "$path"
-    merge_json "$path" "mcpServers" "cloudbooks" "$(build_block_copilot)"
+    merge_json "$path" "mcpServers" "nula" "$(build_block_copilot)"
     ok "  installed"
-    NEXT_STEPS+=("Copilot CLI: mint a bearer token (run scripts/qa-mcp-flow.sh from the Nula server repo) and 'export CLOUDBOOKS_MCP_TOKEN=<token>' before starting 'copilot'. Tokens expire after 90 days. Copilot CLI does NOT do OAuth.")
+    NEXT_STEPS+=("Copilot CLI: mint a bearer token (run scripts/qa-mcp-flow.sh from the Nula server repo) and 'export NULA_MCP_TOKEN=<token>' before starting 'copilot'. Tokens expire after 90 days. Copilot CLI does NOT do OAuth.")
 }
 
 ###############################################################################
