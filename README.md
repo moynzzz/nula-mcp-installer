@@ -1,6 +1,6 @@
 # nula-mcp-installer
 
-One-line installer for the [Cloudbooks](https://nula.bg) MCP server. Wires up the four major MCP clients in one shot:
+One-line installer for the [Nula](https://nula.bg) MCP server. Wires up the four major MCP clients in one shot:
 
 - **Claude Desktop**
 - **Cursor**
@@ -16,16 +16,16 @@ The installer detects which clients are installed on your machine, asks you to p
 ### macOS / Linux
 
 ```sh
-MCP_URL=https://YOUR_CLOUDBOOKS_INSTANCE/mcp bash <(curl -fsSL https://raw.githubusercontent.com/moynzzz/nula-mcp-installer/main/install.sh)
+MCP_URL=https://YOUR_NULA_INSTANCE/mcp bash <(curl -fsSL https://raw.githubusercontent.com/moynzzz/nula-mcp-installer/main/install.sh)
 ```
 
 ### Windows (PowerShell 5.1+ or PowerShell 7)
 
 ```powershell
-iex "& { $(irm https://raw.githubusercontent.com/moynzzz/nula-mcp-installer/main/install.ps1) } -McpUrl https://YOUR_CLOUDBOOKS_INSTANCE/mcp"
+iex "& { $(irm https://raw.githubusercontent.com/moynzzz/nula-mcp-installer/main/install.ps1) } -McpUrl https://YOUR_NULA_INSTANCE/mcp"
 ```
 
-Replace `YOUR_CLOUDBOOKS_INSTANCE` with your actual Cloudbooks host (e.g. `nula.bg`). The placeholder URL is intentionally invalid — the installer will prompt before letting you continue with it.
+Replace `YOUR_NULA_INSTANCE` with your actual Nula host (e.g. `nula.bg`). The placeholder URL is intentionally invalid — the installer will prompt before letting you continue with it.
 
 ---
 
@@ -75,7 +75,7 @@ MCP_URL=https://nula.bg/mcp MCP_TEAM_ID=410 bash <(curl -fsSL .../install.sh)
 
 ## Manual install (if you'd rather not curl-pipe)
 
-Paste these snippets into the relevant file, replacing `https://YOUR_CLOUDBOOKS_INSTANCE/mcp` with your host. If the file already has `mcpServers` / `mcp`, add the `cloudbooks` server *inside* that block — don't overwrite.
+Paste these snippets into the relevant file, replacing `https://YOUR_NULA_INSTANCE/mcp` with your host. If the file already has `mcpServers` / `mcp`, add the `cloudbooks` server *inside* that block — don't overwrite.
 
 ### Claude Desktop
 
@@ -83,7 +83,7 @@ Paste these snippets into the relevant file, replacing `https://YOUR_CLOUDBOOKS_
 {
   "mcpServers": {
     "cloudbooks": {
-      "url": "https://YOUR_CLOUDBOOKS_INSTANCE/mcp",
+      "url": "https://YOUR_NULA_INSTANCE/mcp",
       "transport": "http"
     }
   }
@@ -96,7 +96,7 @@ Paste these snippets into the relevant file, replacing `https://YOUR_CLOUDBOOKS_
 {
   "mcpServers": {
     "cloudbooks": {
-      "url": "https://YOUR_CLOUDBOOKS_INSTANCE/mcp"
+      "url": "https://YOUR_NULA_INSTANCE/mcp"
     }
   }
 }
@@ -109,7 +109,7 @@ Paste these snippets into the relevant file, replacing `https://YOUR_CLOUDBOOKS_
   "mcp": {
     "cloudbooks": {
       "type": "remote",
-      "url": "https://YOUR_CLOUDBOOKS_INSTANCE/mcp",
+      "url": "https://YOUR_NULA_INSTANCE/mcp",
       "enabled": true
     }
   }
@@ -123,7 +123,7 @@ Paste these snippets into the relevant file, replacing `https://YOUR_CLOUDBOOKS_
   "mcpServers": {
     "cloudbooks": {
       "type": "http",
-      "url": "https://YOUR_CLOUDBOOKS_INSTANCE/mcp",
+      "url": "https://YOUR_NULA_INSTANCE/mcp",
       "tools": ["*"],
       "headers": {
         "Authorization": "Bearer ${CLOUDBOOKS_MCP_TOKEN}"
@@ -133,7 +133,7 @@ Paste these snippets into the relevant file, replacing `https://YOUR_CLOUDBOOKS_
 }
 ```
 
-> Copilot CLI does NOT do OAuth automatically. Mint a bearer token externally (the Cloudbooks repo ships `scripts/qa-mcp-flow.sh`) and export it as `CLOUDBOOKS_MCP_TOKEN` before starting `copilot`. Tokens expire after 90 days.
+> Copilot CLI does NOT do OAuth automatically. Mint a bearer token externally (the Nula repo ships `scripts/qa-mcp-flow.sh`) and export it as `CLOUDBOOKS_MCP_TOKEN` before starting `copilot`. Tokens expire after 90 days.
 
 ### Multi-team grants
 
@@ -155,11 +155,11 @@ For **Claude Desktop / Cursor / opencode**, the first time the client connects i
 
 1. Fetch `<MCP_URL>/.well-known/oauth-protected-resource` to discover the auth server.
 2. POST to the auth server's `/oauth/register` (RFC 7591 dynamic client registration).
-3. Open your default browser on the Cloudbooks consent page.
+3. Open your default browser on the Nula consent page.
 
 In the browser you'll see:
 
-- Cloudbooks login (if you're not already signed in).
+- Nula login (if you're not already signed in).
 - A consent screen: a list of your teams (checkboxes) + a **Read / Read+Write** radio. Pick at least one team + Read+Write if you want write tools.
 - Click **Approve** — the browser redirects back to the client's loopback callback and you're connected.
 
@@ -191,12 +191,12 @@ The target config file isn't valid JSON. Open it in an editor, fix the syntax, t
 ### Client connects but reports "0 tools"
 
 - Confirm you actually approved the OAuth consent (Approve button, not Cancel).
-- Confirm your grant covers a team with at least one tool-relevant permission (see the Cloudbooks docs on roles + permissions).
+- Confirm your grant covers a team with at least one tool-relevant permission (see the Nula docs on roles + permissions).
 - Multi-team grants: confirm `Mcp-Team-Id` is set to a team that's in the grant.
 
 ### "401 Unauthorized" from Copilot CLI
 
-Your `CLOUDBOOKS_MCP_TOKEN` is missing, expired, or for the wrong instance. Mint a fresh one (`scripts/qa-mcp-flow.sh` from the Cloudbooks repo) and `export CLOUDBOOKS_MCP_TOKEN=...` before starting `copilot`.
+Your `CLOUDBOOKS_MCP_TOKEN` is missing, expired, or for the wrong instance. Mint a fresh one (`scripts/qa-mcp-flow.sh` from the Nula repo) and `export CLOUDBOOKS_MCP_TOKEN=...` before starting `copilot`.
 
 ### "Something else broke"
 
@@ -243,11 +243,11 @@ If you're testing on a fresh user profile, `mkdir $env:APPDATA\Claude`, `$env:AP
 
 - This installer is **plain bash / PowerShell** — no compiled binaries, no telemetry, no analytics, no auto-update hooks. The entire source is the two scripts in this repo.
 - Read both scripts before piping into `bash` / `iex`. If you don't trust them, copy the snippets from the **Manual install** section above into your client config by hand.
-- The installer **never** mints credentials, **never** stores tokens, and **never** phones home. The only network call is the OAuth flow triggered by the MCP client itself, against the Cloudbooks host *you* specified.
+- The installer **never** mints credentials, **never** stores tokens, and **never** phones home. The only network call is the OAuth flow triggered by the MCP client itself, against the Nula host *you* specified.
 - Token-bearing config (Copilot CLI) uses an env-var reference (`${CLOUDBOOKS_MCP_TOKEN}`), not the token itself. Your config files never contain the literal bearer.
 
 ---
 
 ## License
 
-[MIT](LICENSE). © Cloudbooks (Nula EOOD).
+[MIT](LICENSE). © Nula (Nula EOOD).

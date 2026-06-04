@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # nula-mcp-installer/install.sh
-# One-line installer for the Cloudbooks MCP server.
+# One-line installer for the Nula MCP server.
 # Mac + Linux. Wires up Claude Desktop, Cursor, opencode, and GitHub Copilot CLI.
 # Plain bash + python3 (no jq). Backups every file it touches with .bak before writing.
 
@@ -14,7 +14,7 @@ set -euo pipefail
 # Production URL gets baked in once W4-2 (Vapor deploy) lands. Until then,
 # users override via env. The placeholder is intentionally invalid so a
 # default install fails loudly rather than configuring a dead URL.
-MCP_URL="${MCP_URL:-https://YOUR_CLOUDBOOKS_INSTANCE/mcp}"
+MCP_URL="${MCP_URL:-https://YOUR_NULA_INSTANCE/mcp}"
 
 # Optional. If your grant covers a single team, leave blank — the server
 # auto-picks it. If your grant covers multiple teams, set this to the
@@ -66,7 +66,7 @@ case "$(uname -s)" in
         ;;
 esac
 
-if [ "$MCP_URL" = "https://YOUR_CLOUDBOOKS_INSTANCE/mcp" ]; then
+if [ "$MCP_URL" = "https://YOUR_NULA_INSTANCE/mcp" ]; then
     warn "MCP_URL is the placeholder default."
     warn "Set it explicitly, e.g.:"
     warn "  MCP_URL=https://nula.bg/mcp bash <(curl -fsSL .../install.sh)"
@@ -107,29 +107,26 @@ copilot_config_path() {
 ###############################################################################
 # Detection
 ###############################################################################
-# We mark a client as "installed" if EITHER its binary is on PATH OR its
-# config directory already exists. Either signal is enough — users who've
-# customized config paths still benefit from a detection menu hit.
+# A client counts as "installed" only when we have a strong signal: either its
+# binary is reachable, or its client-specific config file already exists.
+# Dir-alone signals are deliberately rejected — unrelated tools can leave stub
+# config dirs (~/.cursor was a reported false-positive vector on Windows; same
+# risk applies on Mac/Linux).
 
 claude_installed() {
-    [ -d "$HOME/Library/Application Support/Claude" ] \
-        || [ -d "$HOME/.config/Claude" ] \
-        || command -v claude >/dev/null 2>&1
+    [ -f "$(claude_config_path)" ] || command -v claude >/dev/null 2>&1
 }
 
 cursor_installed() {
-    [ -d "$HOME/.cursor" ] \
-        || command -v cursor >/dev/null 2>&1
+    [ -f "$(cursor_config_path)" ] || command -v cursor >/dev/null 2>&1
 }
 
 opencode_installed() {
-    [ -d "$HOME/.config/opencode" ] \
-        || command -v opencode >/dev/null 2>&1
+    [ -f "$(opencode_config_path)" ] || command -v opencode >/dev/null 2>&1
 }
 
 copilot_installed() {
-    command -v copilot >/dev/null 2>&1 \
-        || [ -d "$HOME/.copilot" ]
+    command -v copilot >/dev/null 2>&1
 }
 
 ###############################################################################
@@ -314,7 +311,7 @@ install_copilot() {
     backup_if_present "$path"
     merge_json "$path" "mcpServers" "cloudbooks" "$(build_block_copilot)"
     ok "  installed"
-    NEXT_STEPS+=("Copilot CLI: mint a bearer token (run scripts/qa-mcp-flow.sh from the Cloudbooks repo) and 'export CLOUDBOOKS_MCP_TOKEN=<token>' before starting 'copilot'. Tokens expire after 90 days. Copilot CLI does NOT do OAuth.")
+    NEXT_STEPS+=("Copilot CLI: mint a bearer token (run scripts/qa-mcp-flow.sh from the Nula server repo) and 'export CLOUDBOOKS_MCP_TOKEN=<token>' before starting 'copilot'. Tokens expire after 90 days. Copilot CLI does NOT do OAuth.")
 }
 
 ###############################################################################
@@ -326,7 +323,7 @@ declare -a NEXT_STEPS=()
 
 main_menu() {
     say ""
-    say "${BOLD}Cloudbooks MCP installer${RESET}"
+    say "${BOLD}Nula MCP installer${RESET}"
     say "${DIM}MCP URL: $MCP_URL${RESET}"
     if [ -n "$MCP_TEAM_ID" ]; then
         say "${DIM}Mcp-Team-Id header: $MCP_TEAM_ID${RESET}"

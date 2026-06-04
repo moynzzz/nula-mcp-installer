@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    One-line installer for the Cloudbooks MCP server.
+    One-line installer for the Nula MCP server.
     Windows. Wires up Claude Desktop, Cursor, opencode, and GitHub Copilot CLI.
 
 .DESCRIPTION
@@ -33,7 +33,7 @@ $ErrorActionPreference = 'Stop'
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 
 if ([string]::IsNullOrWhiteSpace($McpUrl)) {
-    $McpUrl = 'https://YOUR_CLOUDBOOKS_INSTANCE/mcp'
+    $McpUrl = 'https://YOUR_NULA_INSTANCE/mcp'
 }
 
 function Write-Info  { param([string]$Msg) Write-Host $Msg -ForegroundColor Cyan }
@@ -41,7 +41,7 @@ function Write-Ok    { param([string]$Msg) Write-Host $Msg -ForegroundColor Gree
 function Write-Warn2 { param([string]$Msg) Write-Host $Msg -ForegroundColor Yellow }
 function Write-Err   { param([string]$Msg) Write-Host $Msg -ForegroundColor Red }
 
-if ($McpUrl -eq 'https://YOUR_CLOUDBOOKS_INSTANCE/mcp') {
+if ($McpUrl -eq 'https://YOUR_NULA_INSTANCE/mcp') {
     Write-Warn2 'MCP_URL is the placeholder default.'
     Write-Warn2 'Set it explicitly, e.g.:'
     Write-Warn2 '  iex "& { $(irm .../install.ps1) } -McpUrl https://nula.bg/mcp"'
@@ -64,25 +64,27 @@ function Get-CopilotConfigPath  { Join-Path $env:USERPROFILE '.copilot\mcp-confi
 ###############################################################################
 # Detection
 ###############################################################################
-# A client counts as "installed" if EITHER its binary is on PATH OR its
-# config directory exists. Either signal is enough — users who've
-# customized config paths still benefit from a detection menu hit.
+# A client counts as "installed" only when we have a strong signal: either its
+# binary is reachable, or its client-specific config file already exists.
+# Dir-alone signals are deliberately rejected — unrelated tools can leave stub
+# config dirs (~/.cursor was a reported false-positive vector on Windows).
 
 function Test-ClaudeInstalled {
-    (Test-Path (Join-Path $env:APPDATA 'Claude')) -or `
+    (Test-Path (Get-ClaudeConfigPath)) -or `
     [bool](Get-Command claude -ErrorAction SilentlyContinue)
 }
 function Test-CursorInstalled {
-    (Test-Path (Join-Path $env:USERPROFILE '.cursor')) -or `
-    [bool](Get-Command cursor -ErrorAction SilentlyContinue)
+    $cursorExe = Join-Path $env:LOCALAPPDATA 'Programs\cursor\Cursor.exe'
+    (Test-Path (Get-CursorConfigPath)) -or `
+    [bool](Get-Command cursor -ErrorAction SilentlyContinue) -or `
+    (Test-Path $cursorExe)
 }
 function Test-OpencodeInstalled {
-    (Test-Path (Join-Path $env:APPDATA 'opencode')) -or `
+    (Test-Path (Get-OpencodeConfigPath)) -or `
     [bool](Get-Command opencode -ErrorAction SilentlyContinue)
 }
 function Test-CopilotInstalled {
-    [bool](Get-Command copilot -ErrorAction SilentlyContinue) -or `
-    (Test-Path (Join-Path $env:USERPROFILE '.copilot'))
+    [bool](Get-Command copilot -ErrorAction SilentlyContinue)
 }
 
 ###############################################################################
@@ -224,7 +226,7 @@ function Install-Copilot {
     Backup-IfPresent $path
     Merge-McpConfig -Target $path -TopKey 'mcpServers' -ServerName 'cloudbooks' -Block (Build-Block-Copilot)
     Write-Ok '  installed'
-    $script:NextSteps += "Copilot CLI: mint a bearer token (run scripts/qa-mcp-flow.sh from the Cloudbooks repo) and set `$env:CLOUDBOOKS_MCP_TOKEN before starting 'copilot'. Tokens expire after 90 days. Copilot CLI does NOT do OAuth."
+    $script:NextSteps += "Copilot CLI: mint a bearer token (run scripts/qa-mcp-flow.sh from the Nula server repo) and set `$env:CLOUDBOOKS_MCP_TOKEN before starting 'copilot'. Tokens expire after 90 days. Copilot CLI does NOT do OAuth."
 }
 
 ###############################################################################
@@ -232,7 +234,7 @@ function Install-Copilot {
 ###############################################################################
 
 Write-Host ''
-Write-Host 'Cloudbooks MCP installer' -ForegroundColor White
+Write-Host 'Nula MCP installer' -ForegroundColor White
 Write-Host "MCP URL: $McpUrl" -ForegroundColor DarkGray
 if ([string]::IsNullOrWhiteSpace($McpTeamId)) {
     Write-Host 'Mcp-Team-Id header: (omitted - server auto-picks if grant covers one team)' -ForegroundColor DarkGray
