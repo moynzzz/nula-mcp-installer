@@ -123,7 +123,7 @@ function Merge-McpConfig {
         $data = [ordered]@{}
     }
 
-    if (-not $data.ContainsKey($TopKey) -or $data[$TopKey] -isnot [System.Collections.IDictionary]) {
+    if (-not $data.Contains($TopKey) -or $data[$TopKey] -isnot [System.Collections.IDictionary]) {
         $data[$TopKey] = [ordered]@{}
     }
     $data[$TopKey][$ServerName] = $Block
